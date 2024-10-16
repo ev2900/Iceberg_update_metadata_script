@@ -35,7 +35,7 @@ Resources:
   DownloadPythonScriptLambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: 'Download-Iceberg-Jar-and-Glue-Script'
+      FunctionName: 'Download-Glue-Script'
       Handler: index.lambda_handler
       Role: !GetAtt LambdaExecutionRole.Arn
       Runtime: python3.8
