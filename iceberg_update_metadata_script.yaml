@@ -171,3 +171,4 @@ Resources:
         PythonVersion: '3'
       DefaultArguments:
         '--additional-python-modules': 'fastavro'
+      MaxCapacity: 1
