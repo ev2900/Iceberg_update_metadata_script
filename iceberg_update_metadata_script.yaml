@@ -172,5 +172,6 @@ Resources:
       DefaultArguments:
         '--additional-python-modules': 'fastavro'
       MaxRetries: 0
+      WorkerType: 'Standard'
       NumberOfWorkers: 1 
       Timeout: 2880
