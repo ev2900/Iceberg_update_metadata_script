@@ -19,3 +19,15 @@ Launch the CloudFormation stack below to deploy a Glue python shell script that 
 After you deploy the CloudFormation stack. You need to update a section of python script. Navigate to the [Glue console](https://us-east-1.console.aws.amazon.com/glue/home) click on **ETL jobs**, then select the **Update Iceberg Metadata**, then click on the **Actions** drop down then **Edit jobs**
 
 <img width="800" alt="quick_setup" src="https://github.com/ev2900/Iceberg_update_metadata_script/blob/main/README/glue_console.png">
+
+In the Glue python script we need to configure 4 python variables. 
+
+```
+# Adjust the values of these variables before running the script
+s3_bucket_name_w_metadata_to_update = 'iceberg-update-metadata-s3-ja1hpqhh5sa9' # ex. register-iceberg-2ut1suuihxyq 
+folder_path_to_metadata = 'iceberg/iceberg.db/sampledataicebergtable/metadata/' # ex. iceberg/iceberg.db/sampledataicebergtable/metadata/ 
+old_s3_bucket_name_or_path = 'iceberg-s3-ezwbt8s0m3vd' # ex. glue-iceberg-from-jars-s3bucket-2ut1suuihxyq
+new_s3_bucket_name_or_path = 'iceberg-update-metadata-s3-ja1hpqhh5sa9' # ex. register-iceberg-2ut1suuihxyq
+```
+
+After updating these variables click on the **Save** and then **Run** button. 
