@@ -31,3 +31,7 @@ new_s3_bucket_name_or_path = '<when you find an instance of ^ what you want to r
 ```
 
 After updating these variables click on the **Save** and then **Run** button. 
+
+<img width="800" alt="quick_setup" src="https://github.com/ev2900/Iceberg_update_metadata_script/blob/main/README/save_run.png">
+
+If you are updating
