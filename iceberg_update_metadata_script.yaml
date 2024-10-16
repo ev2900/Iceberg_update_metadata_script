@@ -168,7 +168,7 @@ Resources:
           - - 's3://'
             - !Ref S3
             - '/scripts/update_iceberg_metadata.py'
-        PythonVersion: '3'
+        PythonVersion: '3.9'
       DefaultArguments:
         '--additional-python-modules': 'fastavro'
       MaxCapacity: 1
