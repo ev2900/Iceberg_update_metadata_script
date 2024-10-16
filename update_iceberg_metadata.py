@@ -140,10 +140,10 @@ def find_most_recent_metadata_json(bucket_name, folder_path_to_metadata):
     print(f"Use this path to in the Iceberg register command s3://{s3_bucket_name_w_metadata_to_update}/{most_recent_event}. This is the newest most recent metadata.json")
 
 # Adjust the values of these variables before running the script
-s3_bucket_name_w_metadata_to_update = 'iceberg-update-metadata-s3-ja1hpqhh5sa9' # ex. register-iceberg-2ut1suuihxyq 
-folder_path_to_metadata = 'iceberg/iceberg.db/sampledataicebergtable/metadata/' # ex. iceberg/iceberg.db/sampledataicebergtable/metadata/ 
-old_s3_bucket_name_or_path = 'iceberg-s3-ezwbt8s0m3vd' # ex. glue-iceberg-from-jars-s3bucket-2ut1suuihxyq
-new_s3_bucket_name_or_path = 'iceberg-update-metadata-s3-ja1hpqhh5sa9' # ex. register-iceberg-2ut1suuihxyq
+s3_bucket_name_w_metadata_to_update = '<s3 bucket name that has the Iceberg metadata that you want to update>' # ex. register-iceberg-2ut1suuihxyq 
+folder_path_to_metadata = '<path to the Iceberg metadata folder in the ^ bucket>' # ex. iceberg/iceberg.db/sampledataicebergtable/metadata/ 
+old_s3_bucket_name_or_path = '<name of S3 bucket or the S3 file path that you want to replace in the Iceberg metadata>' # ex. glue-iceberg-from-jars-s3bucket-2ut1suuihxyq
+new_s3_bucket_name_or_path = '<when you find an instance of ^ what you want to replace it with IE. the name of the S3 bucket or file path the metadata was moved to>' # ex. register-iceberg-2ut1suuihxyq
 
 # Initialize a session using Amazon S3
 s3 = boto3.client('s3')
