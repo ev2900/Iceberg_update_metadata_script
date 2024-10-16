@@ -44,6 +44,4 @@ To find this output access the Cloudwatch Output logs for the Glue job run.
 
 If you navigate to the end of the log stream you will see a log message that provides the file path you can use with [register_table](https://github.com/ev2900/Iceberg_Glue_register_table)
 
-
-
-
+<img width="800" alt="quick_setup" src="https://github.com/ev2900/Iceberg_update_metadata_script/blob/main/README/register_path_logs.png">
