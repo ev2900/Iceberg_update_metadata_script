@@ -173,5 +173,5 @@ Resources:
         '--additional-python-modules': 'fastavro'
       MaxRetries: 0
       NumberOfWorkers: 1 
-      WorkerType: 'Standard'
+      WorkerType: 'G.1X'
       Timeout: 2880
