@@ -16,4 +16,5 @@ Launch the CloudFormation stack below to deploy a Glue python shell script that 
 
 [![Launch CloudFormation Stack](https://sharkech-public.s3.amazonaws.com/misc-public/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=iceberg-update-metadata&templateURL=https://sharkech-public.s3.amazonaws.com/misc-public/iceberg_update_metadata_script.yaml)
 
+After you deploy the CloudFormation stack. You need to update a section of python script. Navigate to the [Glue console](https://us-east-1.console.aws.amazon.com/glue/home) click on **ETL jobs**, then select the **Update Iceberg Metadata**, then click on the **Actions** drop down then **Edit jobs**
 
