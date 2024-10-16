@@ -32,7 +32,7 @@ Resources:
   #
   # Lambda Function to download Iceberg Jar files
   # 
-  DownloadJARsScriptLambdaFunction:
+  DownloadPythonScriptLambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: 'Download-Iceberg-Jar-and-Glue-Script'
@@ -58,38 +58,12 @@ Resources:
 
             if event['RequestType'] == 'Create':
               try:
-                # AWS Bundle
-                response = http.request('GET', 'https://search.maven.org/remotecontent?filepath=org/apache/iceberg/iceberg-aws-bundle/1.6.1/iceberg-aws-bundle-1.6.1.jar')
-      
-                if response.status == 200:
-                  with open('/tmp/iceberg-aws-bundle-1.6.1.jar', 'wb') as f:
-                    f.write(response.data)
-          
-                s3.upload_file('/tmp/iceberg-aws-bundle-1.6.1.jar', os.environ['S3_BUCKET_NAME'], 'jars/iceberg-aws-bundle-1.6.1.jar')
-      
-                # Iceberg
-                response = http.request('GET', 'https://search.maven.org/remotecontent?filepath=org/apache/iceberg/iceberg-spark-runtime-3.3_2.12/1.6.1/iceberg-spark-runtime-3.3_2.12-1.6.1.jar')
-      
-                if response.status == 200:
-                  with open('/tmp/iceberg-spark-runtime-3.3_2.12-1.6.1.jar', 'wb') as f:
-                    f.write(response.data)
-          
-                s3.upload_file('/tmp/iceberg-spark-runtime-3.3_2.12-1.6.1.jar', os.environ['S3_BUCKET_NAME'], 'jars/iceberg-spark-runtime-3.3_2.12-1.6.1.jar')
-  
-                # Glue Job Script
                 copy_source = {
                   'Bucket': 'sharkech-public',
-                  'Key': 'misc-public/0_create_iceberg_table.py'
+                  'Key': 'misc-public/update_iceberg_metadata.py'
                 }
   
-                s3.copy_object(CopySource = copy_source, Bucket = os.environ['S3_BUCKET_NAME'], Key = 'scripts/0_create_iceberg_table.py')
-
-                copy_source = {
-                  'Bucket': 'sharkech-public',
-                  'Key': 'misc-public/1_register_table.py'
-                }
-  
-                s3.copy_object(CopySource = copy_source, Bucket = os.environ['S3_BUCKET_NAME'], Key = 'scripts/1_register_table.py')
+                s3.copy_object(CopySource = copy_source, Bucket = os.environ['S3_BUCKET_NAME'], Key = 'scripts/update_iceberg_metadata.py')
 
                 # Return success status to cloudformation 
                 responseData = {'Status': 'SUCCESS', 'StackId': event['StackId'], 'RequestId': event['RequestId'], 'LogicalResourceId': event['LogicalResourceId'], 'PhysicalResourceId': ''}
@@ -148,30 +122,12 @@ Resources:
   #
   # Customer resource to execute the load CSV lambda function
   #
-  DownloadJARsLambdaFunctionCustomResource:
+  DownloadPythonLambdaFunctionCustomResource:
     Type: AWS::CloudFormation::CustomResource
-    DependsOn: DownloadJARsScriptLambdaFunction
+    DependsOn: DownloadPythonScriptLambdaFunction
     Version: 1.0
     Properties:
-      ServiceToken: !GetAtt DownloadJARsScriptLambdaFunction.Arn
-
-
-  #
-  # Glue data catalog, database
-  #
-  GlueDatabase:
-    Type: 'AWS::Glue::Database'
-    Properties:
-      CatalogId: !Ref 'AWS::AccountId'
-      DatabaseInput:
-        Name: 'iceberg'
-
-  GlueDatabaseRegister:
-    Type: 'AWS::Glue::Database'
-    Properties:
-      CatalogId: !Ref 'AWS::AccountId'
-      DatabaseInput:
-        Name: 'icebergregister'
+      ServiceToken: !GetAtt DownloadPythonScriptLambdaFunction.Arn
 
   #
   # Glue Execution IAM Role
@@ -198,7 +154,7 @@ Resources:
                 Resource: '*'
 
   #
-  # Glue Jobs
+  # Glue Python Shell Job
   #
   IcebergGlueJob:
     Type: 'AWS::Glue::Job'
@@ -206,54 +162,16 @@ Resources:
       Name: '0 Create Iceberg Table'
       Role: !GetAtt GlueExecutionRole.Arn
       Command:
-        Name: 'glueetl'
+        Name: 'pythonshell'
         ScriptLocation: !Join 
           - ''
           - - 's3://'
             - !Ref S3
-            - '/scripts/0_create_iceberg_table.py'
+            - '/scripts/update_iceberg_metadata.py'
         PythonVersion: '3'
       DefaultArguments:
-        '--extra-jars': !Join
-          - ''
-          - - 's3://'
-            - !Ref S3
-            - '/jars/iceberg-aws-bundle-1.6.1.jar,'
-            - 's3://'
-            - !Ref S3
-            - '/jars/iceberg-spark-runtime-3.3_2.12-1.6.1.jar'
-        '--s3_bucket_name': !Ref S3
+        '--additional-python-modules': 'fastavro'
       MaxRetries: 0
-      GlueVersion: '4.0'
-      NumberOfWorkers: 2
-      WorkerType: 'G.1X'
-      Timeout: 2880
-
-  RegisterGlueJob:
-    Type: 'AWS::Glue::Job'
-    Properties:
-      Name: '1 Register Table'
-      Role: !GetAtt GlueExecutionRole.Arn
-      Command:
-        Name: 'glueetl'
-        ScriptLocation: !Join 
-          - ''
-          - - 's3://'
-            - !Ref S3
-            - '/scripts/1_register_table.py'
-        PythonVersion: '3'
-      DefaultArguments:
-        '--extra-jars': !Join
-          - ''
-          - - 's3://'
-            - !Ref S3
-            - '/jars/iceberg-aws-bundle-1.6.1.jar,'
-            - 's3://'
-            - !Ref S3
-            - '/jars/iceberg-spark-runtime-3.3_2.12-1.6.1.jar'
-        '--s3_bucket_name': !Ref S3
-      MaxRetries: 0
-      GlueVersion: '4.0'
-      NumberOfWorkers: 2
-      WorkerType: 'G.1X'
+      NumberOfWorkers: 1 
+      WorkerType: 'Standard'
       Timeout: 2880
