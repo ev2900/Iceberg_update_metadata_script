@@ -159,7 +159,7 @@ Resources:
   IcebergGlueJob:
     Type: 'AWS::Glue::Job'
     Properties:
-      Name: '0 Create Iceberg Table'
+      Name: 'Update Iceberg Metadata'
       Role: !GetAtt GlueExecutionRole.Arn
       Command:
         Name: 'pythonshell'
