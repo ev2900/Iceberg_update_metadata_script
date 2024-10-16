@@ -116,7 +116,11 @@ response = s3.list_objects_v2(Bucket = s3_bucket_name_w_metadata_to_update, Pref
 
 # Check if the response contains 'Contents' (i.e., objects exist)
 if 'Contents' in response:
-    for obj in response['Contents']:
+    
+    # Sort objects before processing them
+    sorted_objects = sorted(response['Contents'], key=lambda obj: obj['LastModified'])
+    
+    for obj in sorted_objects['Contents']:
         object_key = obj['Key']
         
         # Get the file extension
