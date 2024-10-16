@@ -1,1 +1,259 @@
+Description: CloudFormation Deployment of Glue python shell with Iceberg installed from Jar files
+Resources:
+  #
+  # S3 Bucket
+  #
+  S3:
+    Type: AWS::S3::Bucket
+  
+  #
+  # Lambda Function IAM Role
+  # 
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: "sts:AssumeRole"
+      Policies:
+        # Imporvement required - premissions need to be scoped down
+        - PolicyName: Admin
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: 
+                  - '*'
+                Resource: '*'
+  #
+  # Lambda Function to download Iceberg Jar files
+  # 
+  DownloadJARsScriptLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: 'Download-Iceberg-Jar-and-Glue-Script'
+      Handler: index.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: python3.8
+      Code:
+        ZipFile: |
+          
+          import cfnresponse
+          import urllib3
+          import boto3
+          import os
+          
+          def lambda_handler(event, context):
+  
+            s3 = boto3.client('s3')
+            http = urllib3.PoolManager()
 
+            print('-- Event below --')
+            print(event)
+            print('--')
+
+            if event['RequestType'] == 'Create':
+              try:
+                # AWS Bundle
+                response = http.request('GET', 'https://search.maven.org/remotecontent?filepath=org/apache/iceberg/iceberg-aws-bundle/1.6.1/iceberg-aws-bundle-1.6.1.jar')
+      
+                if response.status == 200:
+                  with open('/tmp/iceberg-aws-bundle-1.6.1.jar', 'wb') as f:
+                    f.write(response.data)
+          
+                s3.upload_file('/tmp/iceberg-aws-bundle-1.6.1.jar', os.environ['S3_BUCKET_NAME'], 'jars/iceberg-aws-bundle-1.6.1.jar')
+      
+                # Iceberg
+                response = http.request('GET', 'https://search.maven.org/remotecontent?filepath=org/apache/iceberg/iceberg-spark-runtime-3.3_2.12/1.6.1/iceberg-spark-runtime-3.3_2.12-1.6.1.jar')
+      
+                if response.status == 200:
+                  with open('/tmp/iceberg-spark-runtime-3.3_2.12-1.6.1.jar', 'wb') as f:
+                    f.write(response.data)
+          
+                s3.upload_file('/tmp/iceberg-spark-runtime-3.3_2.12-1.6.1.jar', os.environ['S3_BUCKET_NAME'], 'jars/iceberg-spark-runtime-3.3_2.12-1.6.1.jar')
+  
+                # Glue Job Script
+                copy_source = {
+                  'Bucket': 'sharkech-public',
+                  'Key': 'misc-public/0_create_iceberg_table.py'
+                }
+  
+                s3.copy_object(CopySource = copy_source, Bucket = os.environ['S3_BUCKET_NAME'], Key = 'scripts/0_create_iceberg_table.py')
+
+                copy_source = {
+                  'Bucket': 'sharkech-public',
+                  'Key': 'misc-public/1_register_table.py'
+                }
+  
+                s3.copy_object(CopySource = copy_source, Bucket = os.environ['S3_BUCKET_NAME'], Key = 'scripts/1_register_table.py')
+
+                # Return success status to cloudformation 
+                responseData = {'Status': 'SUCCESS', 'StackId': event['StackId'], 'RequestId': event['RequestId'], 'LogicalResourceId': event['LogicalResourceId'], 'PhysicalResourceId': ''}
+                cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData)
+
+                 # Return lambda response
+                return {
+                  'statusCode': 200,
+                  'body': 'successfully download JAR files and glue script to S3'
+                }
+                
+              except Exception as e:
+                print('-- Error for create request type --')
+                print(e)
+                print('--')
+
+                responseData = {'Status': 'FAILURE', 'StackId': event['StackId'], 'RequestId': event['RequestId'], 'LogicalResourceId': event['LogicalResourceId'], 'PhysicalResourceId': ''}
+                cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData)
+
+                # Return lambda response
+                return {
+                  'statusCode': 400,
+                  'body': 'failed to download JAR files and glue script to S3'
+                }
+
+            elif event['RequestType'] == 'Delete':
+              try:
+                s3 = boto3.resource('s3')
+                bucket = s3.Bucket(os.environ['S3_BUCKET_NAME'])
+              
+                for prefix in ['jars', 'scripts', 'iceberg']:
+                  objects_to_delete = bucket.objects.filter(Prefix=prefix)
+                  objects_to_delete.delete()
+
+                responseData = {'Status': 'SUCCESS', 'StackId': event['StackId'], 'RequestId': event['RequestId'], 'LogicalResourceId': event['LogicalResourceId'], 'PhysicalResourceId': ''}
+                cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData)
+                
+              except Exception as e:
+                print('-- Error for delete request type --')
+                print(e)
+                print('--')
+
+                responseData = {'Status': 'FAILURE', 'StackId': event['StackId'], 'RequestId': event['RequestId'], 'LogicalResourceId': event['LogicalResourceId'], 'PhysicalResourceId': ''}
+                cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData)
+
+                # Return lambda response
+                return {
+                  'statusCode': 400,
+                  'body': 'failed to delete files from S3'
+                }          
+      Timeout: 300
+      Environment:
+        Variables:
+          S3_BUCKET_NAME: !Ref S3
+      
+  #
+  # Customer resource to execute the load CSV lambda function
+  #
+  DownloadJARsLambdaFunctionCustomResource:
+    Type: AWS::CloudFormation::CustomResource
+    DependsOn: DownloadJARsScriptLambdaFunction
+    Version: 1.0
+    Properties:
+      ServiceToken: !GetAtt DownloadJARsScriptLambdaFunction.Arn
+
+
+  #
+  # Glue data catalog, database
+  #
+  GlueDatabase:
+    Type: 'AWS::Glue::Database'
+    Properties:
+      CatalogId: !Ref 'AWS::AccountId'
+      DatabaseInput:
+        Name: 'iceberg'
+
+  GlueDatabaseRegister:
+    Type: 'AWS::Glue::Database'
+    Properties:
+      CatalogId: !Ref 'AWS::AccountId'
+      DatabaseInput:
+        Name: 'icebergregister'
+
+  #
+  # Glue Execution IAM Role
+  # 
+  GlueExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: glue.amazonaws.com
+            Action: "sts:AssumeRole"
+      Policies:
+        # Imporvement required - premissions need to be scoped down
+        - PolicyName: Admin
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: 
+                  - '*'
+                Resource: '*'
+
+  #
+  # Glue Jobs
+  #
+  IcebergGlueJob:
+    Type: 'AWS::Glue::Job'
+    Properties:
+      Name: '0 Create Iceberg Table'
+      Role: !GetAtt GlueExecutionRole.Arn
+      Command:
+        Name: 'glueetl'
+        ScriptLocation: !Join 
+          - ''
+          - - 's3://'
+            - !Ref S3
+            - '/scripts/0_create_iceberg_table.py'
+        PythonVersion: '3'
+      DefaultArguments:
+        '--extra-jars': !Join
+          - ''
+          - - 's3://'
+            - !Ref S3
+            - '/jars/iceberg-aws-bundle-1.6.1.jar,'
+            - 's3://'
+            - !Ref S3
+            - '/jars/iceberg-spark-runtime-3.3_2.12-1.6.1.jar'
+        '--s3_bucket_name': !Ref S3
+      MaxRetries: 0
+      GlueVersion: '4.0'
+      NumberOfWorkers: 2
+      WorkerType: 'G.1X'
+      Timeout: 2880
+
+  RegisterGlueJob:
+    Type: 'AWS::Glue::Job'
+    Properties:
+      Name: '1 Register Table'
+      Role: !GetAtt GlueExecutionRole.Arn
+      Command:
+        Name: 'glueetl'
+        ScriptLocation: !Join 
+          - ''
+          - - 's3://'
+            - !Ref S3
+            - '/scripts/1_register_table.py'
+        PythonVersion: '3'
+      DefaultArguments:
+        '--extra-jars': !Join
+          - ''
+          - - 's3://'
+            - !Ref S3
+            - '/jars/iceberg-aws-bundle-1.6.1.jar,'
+            - 's3://'
+            - !Ref S3
+            - '/jars/iceberg-spark-runtime-3.3_2.12-1.6.1.jar'
+        '--s3_bucket_name': !Ref S3
+      MaxRetries: 0
+      GlueVersion: '4.0'
+      NumberOfWorkers: 2
+      WorkerType: 'G.1X'
+      Timeout: 2880
