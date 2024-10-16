@@ -103,10 +103,10 @@ def update_json(bucket_name, object_key, old_bucket_name_or_path, new_bucket_nam
     s3.put_object(Bucket=bucket_name, Key=object_key, Body=modified_json_content)
     
 # Adjust the values of these variables before running the script
-s3_bucket_name_w_metadata_to_update = 'register-iceberg-2ut1suuihxyq'
-folder_path_to_metadata = 'iceberg/iceberg.db/sampledataicebergtable/metadata/'
-old_s3_bucket_name_or_path = 'glue-iceberg-from-jars-s3bucket-2ut1suuihxyq'
-new_s3_bucket_name_or_path = 'register-iceberg-2ut1suuihxyq'
+s3_bucket_name_w_metadata_to_update = '<s3 bucket name that has the Iceberg metadata that you want to update>' # ex. register-iceberg-2ut1suuihxyq 
+folder_path_to_metadata = '<path to the Iceberg metadata folder in the ^ bucket>' # ex. iceberg/iceberg.db/sampledataicebergtable/metadata/ 
+old_s3_bucket_name_or_path = '<name of S3 bucket or the S3 file path that you want to replace in the Iceberg metadata>' # ex. glue-iceberg-from-jars-s3bucket-2ut1suuihxyq
+new_s3_bucket_name_or_path = '<when you find an instance of ^ what you want to replace it with IE. the name of the S3 bucket or file path the metadata was moved to>' # ex. register-iceberg-2ut1suuihxyq
 
 # Initialize a session using Amazon S3
 s3 = boto3.client('s3')
@@ -134,3 +134,5 @@ if 'Contents' in response:
             
 else:
     print("No objects found in the specified folder")
+    
+# Print the file name of the most recent metadata.json file. This can be used as an input for the register command
