@@ -20,7 +20,7 @@ After you deploy the CloudFormation stack. You need to update a section of pytho
 
 <img width="800" alt="quick_setup" src="https://github.com/ev2900/Iceberg_update_metadata_script/blob/main/README/glue_console.png">
 
-In the Glue python script we need to configure 4 python variables. 
+In the Glue python script, you need to configure 4 python variables. 
 
 ```
 # Adjust the values of these variables before running the script
@@ -34,4 +34,8 @@ After updating these variables click on the **Save** and then **Run** button.
 
 <img width="800" alt="quick_setup" src="https://github.com/ev2900/Iceberg_update_metadata_script/blob/main/README/save_run.png">
 
-If you are updating
+If you are running this script and updating the S3 references in the metadata.json and AVRO files with the intent of using the [register_table](https://github.com/ev2900/Iceberg_Glue_register_table) command.
+
+The python script outputs the path of the latest metadata.json file for the Iceberg table. This can be directly input into the [register_table](https://github.com/ev2900/Iceberg_Glue_register_table) command. 
+
+To find this output access the Cloudwatch Output logs for the Glue job run.
