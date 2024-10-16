@@ -39,3 +39,11 @@ If you are running this script and updating the S3 references in the metadata.js
 The python script outputs the path of the latest metadata.json file for the Iceberg table. This can be directly input into the [register_table](https://github.com/ev2900/Iceberg_Glue_register_table) command. 
 
 To find this output access the Cloudwatch Output logs for the Glue job run.
+
+<img width="800" alt="quick_setup" src="https://github.com/ev2900/Iceberg_update_metadata_script/blob/main/README/output_logs_1.png">
+
+If you navigate to the end of the log stream you will see a log message that provides the file path you can use with [register_table](https://github.com/ev2900/Iceberg_Glue_register_table)
+
+
+
+
