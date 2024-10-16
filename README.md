@@ -12,4 +12,8 @@ After we updated the S3 references we can optionally [register](https://github.c
     
 ## Example using Glue python shell job
 
+Launch the CloudFormation stack below to deploy a Glue python shell script that can be used to update the metadata.json and AVRO files.
+
 [![Launch CloudFormation Stack](https://sharkech-public.s3.amazonaws.com/misc-public/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=iceberg-update-metadata&templateURL=https://sharkech-public.s3.amazonaws.com/misc-public/iceberg_update_metadata_script.yaml)
+
+
