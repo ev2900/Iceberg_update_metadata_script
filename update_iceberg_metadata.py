@@ -76,25 +76,25 @@ def update_json(bucket_name, object_key, old_bucket_name_or_path, new_bucket_nam
         # Iterate through dictionary
         for key in data:
             if isinstance(data[key], str):
-                data[key] = data[key].replace(old_s3_bucket_name_or_path, new_s3_bucket_name_or_path)
+                data[key] = data[key].replace(old_bucket_name_or_path, new_bucket_name_or_path)
             elif isinstance(data[key], list):
                 for i, item in enumerate(data[key]):
                     if isinstance(item, str):
-                        data[key][i] = item.replace(old_s3_bucket_name_or_path, new_s3_bucket_name_or_path)
+                        data[key][i] = item.replace(old_bucket_name_or_path, new_bucket_name_or_path)
                     elif isinstance(item, dict):
                         for sub_key in item:
                             if isinstance(item[sub_key], str):
-                                item[sub_key] = item[sub_key].replace(old_s3_bucket_name_or_path, new_s3_bucket_name_or_path)
+                                item[sub_key] = item[sub_key].replace(old_bucket_name_or_path, new_bucket_name_or_path)
                                 
     elif isinstance(data, list):
         # Iterate through list
         for i, item in enumerate(data):
             if isinstance(item, str):
-                data[i] = item.replace(old_s3_bucket_name_or_path, new_s3_bucket_name_or_path)
+                data[i] = item.replace(old_bucket_name_or_path, new_bucket_name_or_path)
             elif isinstance(item, dict):
                 for key in item:
                     if isinstance(item[key], str):
-                        item[key] = item[key].replace(old_s3_bucket_name_or_path, new_s3_bucket_name_or_path)
+                        item[key] = item[key].replace(old_bucket_name_or_path, new_bucket_name_or_path)
                                 
     # Convert the modified data back to JSON
     modified_json_content = json.dumps(data, indent = 4)
