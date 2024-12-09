@@ -76,6 +76,10 @@ def update_json(bucket_name, object_key, old_bucket_name_or_path, new_bucket_nam
     def replace_value(json_data, target_value, replacement_value):
         if isinstance(json_data, dict):  # If it's a dictionary, iterate over the keys and values
             for key, value in json_data.items():
+
+                #
+                # Fix required. Not working
+                #
                 if value == target_value:
                     json_data[key] = replacement_value
                 else:
