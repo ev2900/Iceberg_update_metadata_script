@@ -78,7 +78,7 @@ def update_json(bucket_name, object_key, old_bucket_name_or_path, new_bucket_nam
             for key, value in json_data.items():
 
                 #
-                # Fix required. Not working
+                # Fix required. Not working. Need to replace value == target_value with a search for partical
                 #
                 if value == target_value:
                     json_data[key] = replacement_value
