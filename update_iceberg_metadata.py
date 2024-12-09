@@ -76,20 +76,19 @@ def update_json(bucket_name, object_key, old_bucket_name_or_path, new_bucket_nam
     def replace_value(json_data, target_value, replacement_value):
         if isinstance(json_data, dict):  # If it's a dictionary, iterate over the keys and values
             for key, value in json_data.items():
-
-                #
-                # Fix required. Not working. Need to replace value == target_value with a search for partical
-                #
-                if value == target_value:
-                    json_data[key] = replacement_value
+                if type(value) is str:
+                        if 's3://' in value: 
+                            json_data[key] = value.replace(old_bucket_name_or_path, new_bucket_name_or_path)
                 else:
-                    replace_value(value, target_value, replacement_value)  # Recursively call for nested values
+                    replace_value(value, target_value, replacement_value) # Recursively call for nested values
+        
         elif isinstance(json_data, list):  # If it's a list, iterate over the items
             for index, item in enumerate(json_data):
-                if item == target_value:
-                    json_data[index] = replacement_value
-                else:
-                    replace_value(item, target_value, replacement_value)  # Recursively call for nested items
+                if type(item) is str:
+                    if 's3://' in item:
+                        json_data[index] = item.replace(old_bucket_name_or_path, new_bucket_name_or_path)
+                    else:
+                        replace_value(item, target_value, replacement_value)  # Recursively call for nested items
 
     # Replace the old_bucket_name_or_path with the new_bucket_name_or_path
     replace_value(data, old_bucket_name_or_path, new_bucket_name_or_path)
