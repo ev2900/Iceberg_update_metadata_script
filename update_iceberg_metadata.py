@@ -84,11 +84,10 @@ def update_json(bucket_name, object_key, old_bucket_name_or_path, new_bucket_nam
         
         elif isinstance(json_data, list):  # If it's a list, iterate over the items
             for index, item in enumerate(json_data):
-                if type(item) is str:
-                    if 's3://' in item:
-                        json_data[index] = item.replace(old_bucket_name_or_path, new_bucket_name_or_path)
-                    else:
-                        replace_value(item, target_value, replacement_value)  # Recursively call for nested items
+                if 's3://' in item:
+                    json_data[index] = item.replace(old_bucket_name_or_path, new_bucket_name_or_path)
+                else:
+                    replace_value(item, target_value, replacement_value)  # Recursively call for nested items
 
     # Replace the old_bucket_name_or_path with the new_bucket_name_or_path
     replace_value(data, old_bucket_name_or_path, new_bucket_name_or_path)
