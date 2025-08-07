@@ -1,6 +1,6 @@
 # Python script to update S3 file paths in Iceberg metadata
 
-<img width="275" alt="map-user" src="https://img.shields.io/badge/cloudformation template deployments-82-blue"> <img width="85" alt="map-user" src="https://img.shields.io/badge/views-1286-green"> <img width="125" alt="map-user" src="https://img.shields.io/badge/unique visits-457-green">
+<img width="275" alt="map-user" src="https://img.shields.io/badge/cloudformation template deployments-82-blue"> <img width="85" alt="map-user" src="https://img.shields.io/badge/views-1324-green"> <img width="125" alt="map-user" src="https://img.shields.io/badge/unique visits-457-green">
 
 When you create an Apache Iceberg table on S3 the Iceberg table has both data files and metadata files. If you physically copy the files that make an Iceberg table to another S3 bucket the metadata files need to be updated.
 
