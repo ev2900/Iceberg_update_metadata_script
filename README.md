@@ -2,6 +2,11 @@
 
 <img width="275" alt="map-user" src="https://img.shields.io/badge/cloudformation template deployments-93-blue"> <img width="85" alt="map-user" src="https://img.shields.io/badge/views-1496-green"> <img width="125" alt="map-user" src="https://img.shields.io/badge/unique visits-558-green">
 
+> [!CAUTION]
+> As of Apache Iceberg version 1.9.0 a procedure ```rewrite_table_path``` was added. This procedure will updated the absolute path reference in the Iceberg metadata and stage this updated copy in preparation for table migration.
+> 
+> I STRONGLY encourage you to use the ```rewrite_table_path``` procedure instead of this scripts in the repository. The documentation for this procedure can be found [HERE](https://iceberg.apache.org/docs/1.9.0/spark-procedures/#rewrite_table_path).
+
 When you create an Apache Iceberg table on S3 the Iceberg table has both data files and metadata files. If you physically copy the files that make an Iceberg table to another S3 bucket the metadata files need to be updated.
 
 The metadata files (metadata.json files and AVRO files) have fields that reference the S3 path of the AVRO and data files. When you copy the files that make an Iceberg table to another S3 bucket the S3 path references will still be to the old / S3 bucket the files were copied from.
