@@ -4,7 +4,7 @@
 
 > [!CAUTION]
 > As of Apache Iceberg version 1.9.0 a procedure ```rewrite_table_path``` was added. This procedure will updated the absolute path reference in the Iceberg metadata and stage this updated copy in preparation for table migration.
-> 
+>
 > I STRONGLY encourage you to use the ```rewrite_table_path``` procedure instead of this scripts in the repository. The documentation for this procedure can be found [HERE](https://iceberg.apache.org/docs/1.9.0/spark-procedures/#rewrite_table_path).
 
 When you create an Apache Iceberg table on S3 the Iceberg table has both data files and metadata files. If you physically copy the files that make an Iceberg table to another S3 bucket the metadata files need to be updated.
