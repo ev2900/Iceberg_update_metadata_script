@@ -1,6 +1,6 @@
 # Python script to update S3 file paths in Iceberg metadata
 
-<img width="275" alt="map-user" src="https://img.shields.io/badge/cloudformation template deployments-101-blue"> <img width="85" alt="map-user" src="https://img.shields.io/badge/views-1633-green"> <img width="125" alt="map-user" src="https://img.shields.io/badge/unique visits-597-green">
+<img width="275" alt="map-user" src="https://img.shields.io/badge/cloudformation template deployments-101-blue"> <img width="85" alt="map-user" src="https://img.shields.io/badge/views-1633-green"> <img width="125" alt="map-user" src="https://img.shields.io/badge/unique visits-615-green">
 
 > [!CAUTION]
 > As of Apache Iceberg version 1.9.0 a procedure ```rewrite_table_path``` was added. This procedure will updated the absolute path reference in the Iceberg metadata and stage this updated copy in preparation for table migration.
